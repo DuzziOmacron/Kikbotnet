@@ -2,6 +2,7 @@ import sys
 import os
 import time
 import subprocess
+import socket
 import contextlib
 #from keepalive import keep_alive
 from urllib.request import urlopen
