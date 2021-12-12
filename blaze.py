@@ -108,6 +108,49 @@ name = input(bcolors.OKGREEN + ("\nWhat is your name?: ") + bcolors.ENDC)
 
 print(bcolors.OKGREEN + ("\nHello, " + name + "!") + bcolors.ENDC)
 
+setup_preset = False
+def get_preset():
+    global setup_preset
+    ask_preset = input(bcolors.OKGREEN + ("Would you like to setup automatic startup?\n[1] Yes, I would like to set it up.\n[2] No, I would like to startup manually.\n> ") + bcolors.ENDC)
+    if str(ask_preset) == "1":
+        print(bcolors.OKGREEN + ("Great! I'll setup automatic startup for you.\nJust input your details like normal and I'll do the rest!") + bcolors.ENDC)
+        setup_preset = True
+    elif str(ask_preset) == "2":
+        ominous_dots(bcolors.OKGREEN + ("Okay, continuing without automatic startup") + bcolors.ENDC)
+    else:
+        print(bcolors.FAIL + "Invalid input! Please only use the number \"1\" or \"2\" (without quotations)\nExiting..." + bcolors.ENDC)
+        exit()
+
+if use_preset == False:
+    get_preset()
+
+if use_preset == True:
+    ask_preset = input(bcolors.OKGREEN + ("\nI see you have startup.py configured.\nWould you like to use automatic startup?\n[1] Yes, I want to use automatic startup.\n[2] No, I want to startup manually.\n[3] No, I want to change automatic startup settings.\n> ") + bcolors.ENDC)
+    if str(ask_preset) == "1":
+        ominous_dots(bcolors.OKGREEN + ("\nOkay! Using automatic startup") + bcolors.ENDC)
+        print("\n")
+    elif str(ask_preset) == "2":
+        ominous_dots(bcolors.OKGREEN + ("Okay, continuing without automatic startup") + bcolors.ENDC)
+        use_preset = False
+    elif str(ask_preset) == "3":
+        ask_change = input(bcolors.OKGREEN + ("Okay! Let's change automatic startup.\n[1] Change credentials\n[2] Reset to default settings\n") + bcolors.ENDC)
+        if str(ask_change) == "1":
+            print(bcolors.OKGREEN + ("Great! I'll setup automatic startup for you.\nJust input your details like normal and I'll do the rest!") + bcolors.ENDC)
+            setup_preset = True
+        elif str(ask_change) == "2":
+            clear = open("startup.py", "w+")
+            clear.write("\'\'\'\nThis is where you add details to speed up the bootup process.\n\'\'\'\nuse_preset = False\n\npreset_username = \"\"\n\npreset_password = \"\"\n\npreset_num_of_bots = 0")
+            clear.close()
+            input(bcolors.OKGREEN + "Okay, I've reset your settings to the default. Press enter to continue with manual startup." + bcolors.ENDC)
+            use_preset = False
+        else:
+            print(bcolors.FAIL + "Invalid input! Please only use the number \"1\" or \"2\" (without quotations)\nExiting..." + bcolors.ENDC)
+            exit()
+    else:
+        print(bcolors.FAIL + "Invalid input! Please only use the number \"1\", \"2\" or \"3\" (without quotations)\nExiting..." + bcolors.ENDC)
+        exit()
+
+
 def get_prefix(): #This function asks for the bot prefix.
     username_thing = input(bcolors.OKGREEN + ("\nLet's get started.\nWhat is the prefix of your bots usernames?: ") + bcolors.ENDC) #This asks for the bot username prefix in the terminal.
     return username_thing
