@@ -12,7 +12,8 @@ if check_for_startup == False:
   clear.close()
 from startup import use_preset, preset_username, preset_password, preset_num_of_bots
 
-global ominous_dots, bcolors #This allows us to use the bcolors class and ominous_dots function later in the script.
+global ominous_dots, bcolors, antipurge #This allows us to use the bcolors class and ominous_dots function later in the script.
+antipurge = False
 
 class bcolors:  # This is for adding colors to text in the terminal.
     OKBLUE = '\033[94m'  # This is blue
@@ -37,30 +38,27 @@ with contextlib.redirect_stdout(None): #This hides the output from installation 
         os.system('git clone -b new https://github.com/StethoSaysHello/kik-bot-api-unofficial')  # This installs the stuff from stetho's fork of Tomer8007's API. Just has some redundant stuff quoted out, keys added
     os.system('pip3 install ./kik-bot-api-unofficial')
 
-try:
-  version_page = "https://UpdateCheck.stethosayshello.repl.co" #This grabs the page where the current version is
-  page = urlopen(version_page) #This opens the page
-  raw_version = page.read() #This reads the page
-  version = raw_version.decode("utf-8") #This decodes the page and gives us a string
-  '''
-  The 5 lines below this comment is a killswitch.
-  You are welcome to remove it, it will not effect the botnet if you do, but it is there for YOUR safety!
-  It is only used if a serious, potentially harmful bug or exploit in the botnet's code is discovered.
-  The killswitch does not cause any kind of harm, it simply asks you to update and deletes the bot code.
-  '''
-  if version == "killswitch": #This checks if the killswitch has been activated
-      print(bcolors.FAIL + ("This version of the botnet has been killswitched!\nThis is only used if a serious, potentially harmful bug or exploit in the botnet's code is discovered.\nPlease visit https://github.com/StethoSaysHello/KikBotnet to check for updates! If you need help, email StethoSpasm@Gmail.com\n\nFor your saftey, I am now deleting this script.\nDon't worry, this will not cause any harm to your local machine!") + bcolors.ENDC) #This explains the killswitch to a user
-      path = os.getcwd() #This finds the path the script is running on
-      os.remove(path + '\%s' % sys.argv[0]) #This removes the script
-      exit() #This stops the script if its still somehow active
-  if version == "v5.3": #This checks if this script is up to date
+version_pastebin = "https://pastebin.com/raw/nJw8LV9C" #This grabs the pastebin where the current version is
+page = urlopen(version_pastebin) #This opens the pastebin
+raw_version = page.read() #This reads the pastebin
+version = raw_version.decode("utf-8") #This decodes the page and gives us a string
+'''
+The 5 lines below this comment is a killswitch.
+You are welcome to remove it, it will not effect the botnet if you do, but it is there for YOUR safety!
+It is only used if a serious, potentially harmful bug or exploit in the botnet's code is discovered.
+The killswitch does not cause any kind of harm, it simply asks you to update and deletes the bot code.
+'''
+if version == "killswitch": #This checks if the killswitch has been activated
+    print(bcolors.FAIL + ("This version of the botnet has been killswitched!\nThis is only used if a serious, potentially harmful bug or exploit in the botnet's code is discovered.\nPlease visit https://github.com/StethoSaysHello/KikBotnet to check for updates! If you need help, email StethoSpasm@Gmail.com\n\nFor your saftey, I am now deleting this script.\nDon't worry, this will not cause any harm to your local machine!") + bcolors.ENDC) #This explains the killswitch to a user
+    path = os.getcwd() #This finds the path the script is running on
+    os.remove(path + '\%s' % sys.argv[0]) #This removes the script
+    exit() #This stops the script if its still somehow active
+
+if version == "v5.2": #This checks if this script is up to date
     pass
-  else: #This is activated if the user is not up to date
-      print(bcolors.FAIL + ("There is a new version of the botnet available! Please install the update, it can be found at https://github.com/StethoSaysHello/KikBotnet") + bcolors.ENDC)  # This asks the user to update
-      input("Press enter to continue if you still want to use this outdated version! (Weirdo! lol)")
-except:
-  print(bcolors.FAIL + "Oh no! There was a problem checking for updates... This is probably from hosting issues. If you need to check for updates in the meantime, please visit Github.com/StethoSaysHello/KikBotnet\n(You can still use the botnet!)" + bcolors.ENDC)
-  input(bcolors.OKBLUE + "Press enter to continue: " + bcolors.ENDC)
+else: #This is activated if the user is not up to date
+    print(bcolors.FAIL + ("There is a new version of the botnet available! Please install the update, it can be found at https://github.com/StethoSaysHello/KikBotnet") + bcolors.ENDC) #This asks the user to update
+    input("Press enter to continue if you still want to use this outdated version! (Weirdo! lol)")
 
 def install(package):  # This is a function to make the installs a little more efficient. I could have just used os.system again, but...
     subprocess.check_call([sys.executable, "-m", "pip", "install", package]) #This installs the package
@@ -93,74 +91,36 @@ from kik_unofficial.datatypes.xmpp.login import LoginResponse, ConnectionFailedR
 
 clear = open("kik-debug.log", "w+")  #This clears out debug logs if there are any.
 clear.close()  #This closes the debug log, always a good practice.
+clear = open("jidlist.txt", "w+")  #This clears out the jid list if there is one.
+clear.close()  #This closes the file, always a good practice.
 
-global username_thing, spam, debug_jid, thing, attempt_number, given_pass, setup_preset #This declares these variables as global to be used everywhere because I'm lazy
+global username_thing, spam, debug_jid, thing, attempt_number, given_pass, jid_list, name #This declares these variables as global to be used everywhere because I'm lazy
 attempt_number = 0 #This helps to check if it is the first set of logins or not for retrying closed connections.
-print("For help, check out the README! https://github.com/StethoSaysHello/KikBotnet\n") #This is a lil disclaimer on bootup.
-print(bcolors.OKGREEN + ("╭╮╭━╮╭╮    ╭━━╮   ╭╮      ╭╮\n┃┃┃╭╯┃┃    ┃╭╮┃  ╭╯╰╮    ╭╯╰╮\n┃╰╯╯╭┫┃╭╮  ┃╰╯╰┳━┻╮╭╋━╮╭━┻╮╭╯\n┃╭╮┃┣┫╰╯╯  ┃╭━╮┃╭╮┃┃┃╭╮┫┃━┫┃\n┃┃┃╰┫┃╭╮╮  ┃╰━╯┃╰╯┃╰┫┃┃┃┃━┫╰╮\n╰╯╰━┻┻╯╰╯  ╰━━━┻━━┻━┻╯╰┻━━┻━╯\n##### Created by Stetho #####") + bcolors.ENDC) #This is some neat text art on bootup. ooo greeeen
+print(bcolors.OKGREEN + ("\n╭╮╭━╮╭╮    ╭━━╮   ╭╮      ╭╮\n┃┃┃╭╯┃┃    ┃╭╮┃  ╭╯╰╮    ╭╯╰╮\n┃╰╯╯╭┫┃╭╮  ┃╰╯╰┳━┻╮╭╋━╮╭━┻╮╭╯\n┃╭╮┃┣┫╰╯╯  ┃╭━╮┃╭╮┃┃┃╭╮┫┃━┫┃\n┃┃┃╰┫┃╭╮╮  ┃╰━╯┃╰╯┃╰┫┃┃┃┃━┫╰╮\n╰╯╰━┻┻╯╰╯  ╰━━━┻━━┻━┻╯╰┻━━┻━╯\n##### Created by Stetho #####") + bcolors.ENDC) #This is some neat text art on bootup. ooo greeeen
 spam = "Qm90IG1hZGUgYnkgU3RldGhvU2F5c0hlbGxv" #This is just a random variable to be used later in the "spam" command.
 debug_jid = "8675309debug_y8f@talk.kik.com" #This is where activity info is sent to. Has to be a JID, not a GJID.
+jid_list = []
 
-print(bcolors.OKGREEN + "\nLet's get started!" + bcolors.ENDC)
+print(bcolors.OKBLUE + ("\nThank you for using the paid version, you keep me modivated to continue creating and improving scripts like these! - Stetho") + bcolors.ENDC)
 
-setup_preset = False
-def get_preset():
-    global setup_preset
-    ask_preset = input(bcolors.OKGREEN + ("Would you like to setup automatic startup?\n[1] Yes, I would like to set it up.\n[2] No, I would like to startup manually.\n> ") + bcolors.ENDC)
-    if str(ask_preset) == "1":
-        print(bcolors.OKGREEN + ("Great! I'll setup automatic startup for you.\nJust input your details like normal and I'll do the rest!") + bcolors.ENDC)
-        setup_preset = True
-    elif str(ask_preset) == "2":
-        ominous_dots(bcolors.OKGREEN + ("Okay, continuing without automatic startup") + bcolors.ENDC)
-    else:
-        print(bcolors.FAIL + "Invalid input! Please only use the number \"1\" or \"2\" (without quotations)\nExiting..." + bcolors.ENDC)
-        exit()
+name = input(bcolors.OKGREEN + ("\nWhat is your name?: ") + bcolors.ENDC)
 
-if use_preset == False:
-    get_preset()
-
-if use_preset == True:
-    ask_preset = input(bcolors.OKGREEN + ("\nI see you have startup.py configured.\nWould you like to use automatic startup?\n[1] Yes, I want to use automatic startup.\n[2] No, I want to startup manually.\n[3] No, I want to change automatic startup settings.\n> ") + bcolors.ENDC)
-    if str(ask_preset) == "1":
-        ominous_dots(bcolors.OKGREEN + ("\nOkay! Using automatic startup") + bcolors.ENDC)
-        print("\n")
-    elif str(ask_preset) == "2":
-        ominous_dots(bcolors.OKGREEN + ("Okay, continuing without automatic startup") + bcolors.ENDC)
-        use_preset = False
-    elif str(ask_preset) == "3":
-        ask_change = input(bcolors.OKGREEN + ("Okay! Let's change automatic startup.\n[1] Change credentials\n[2] Reset to default settings\n") + bcolors.ENDC)
-        if str(ask_change) == "1":
-            print(bcolors.OKGREEN + ("Great! I'll setup automatic startup for you.\nJust input your details like normal and I'll do the rest!") + bcolors.ENDC)
-            setup_preset = True
-        elif str(ask_change) == "2":
-            clear = open("startup.py", "w+")
-            clear.write("\'\'\'\nThis is where you add details to speed up the bootup process.\n\'\'\'\nuse_preset = False\n\npreset_username = \"\"\n\npreset_password = \"\"\n\npreset_num_of_bots = 0")
-            clear.close()
-            input(bcolors.OKGREEN + "Okay, I've reset your settings to the default. Press enter to continue with manual startup." + bcolors.ENDC)
-            use_preset = False
-        else:
-            print(bcolors.FAIL + "Invalid input! Please only use the number \"1\" or \"2\" (without quotations)\nExiting..." + bcolors.ENDC)
-            exit()
-    else:
-        print(bcolors.FAIL + "Invalid input! Please only use the number \"1\", \"2\" or \"3\" (without quotations)\nExiting..." + bcolors.ENDC)
-        exit()
-
+print(bcolors.OKGREEN + ("\nHello, " + name + "!") + bcolors.ENDC)
 
 def get_prefix(): #This function asks for the bot prefix.
-    username_thing = input(bcolors.OKGREEN + ("\n\nWhat is the prefix of your bots usernames?: ") + bcolors.ENDC) #This asks for the bot username prefix in the terminal.
+    username_thing = input(bcolors.OKGREEN + ("\nLet's get started.\nWhat is the prefix of your bots usernames?: ") + bcolors.ENDC) #This asks for the bot username prefix in the terminal.
     return username_thing
 
-if use_preset == True:
-    username_thing = preset_username
-else:
-    username_thing = get_prefix() #This triggers the function that aske for the bot prefix
-    if len(username_thing) == 0: #This checks for blank prefixes, and retries get_prefix if there are any.
-        print(bcolors.FAIL + ("Uh-oh, it looks like you didn't provide any input! Let's try that again.") + bcolors.ENDC)
-        username_thing = get_prefix()
-    if " " in username_thing: #This checks for spaces in the prefix, and retries get_prefix if there are any.
-        print(bcolors.FAIL + ("Uh-oh! There is a space in the username prefix you provided. Let's try that again.") + bcolors.ENDC)
-        username_thing = get_prefix()
-    print(bcolors.OKGREEN + ("\nOkay, I will be signing into your botnet as \"" + username_thing + "1\", \"" + username_thing + "2\", and so on.\nIf this is incorrect, please restart this session.") + bcolors.ENDC) #This explains how the bots will sign in.
+username_thing = get_prefix() #This triggers the function that aske for the bot prefix
+
+if len(username_thing) == 0: #This checks for blank prefixes, and retries get_prefix if there are any.
+    print(bcolors.FAIL + ("Uh-oh, it looks like you didn't provide any input! Let's try that again.") + bcolors.ENDC)
+    username_thing = get_prefix()
+if " " in username_thing: #This checks for spaces in the prefix, and retries get_prefix if there are any.
+    print(bcolors.FAIL + ("Uh-oh! There is a space in the username prefix you provided. Let's try that again.") + bcolors.ENDC)
+    username_thing = get_prefix()
+
+print(bcolors.OKGREEN + ("\nOkay, I will be signing into your botnet as \"" + username_thing + "1\", \"" + username_thing + "2\", and so on.\nIf this is incorrect, please restart this session.") + bcolors.ENDC) #This explains how the bots will sign in.
 
 def get_bot_quantity(): #This function asks the user how many bots they wanna use.
     try:
@@ -170,33 +130,17 @@ def get_bot_quantity(): #This function asks the user how many bots they wanna us
         thing = "NULL" #Just put a random string here to catch ValueError, could have put whatever.
     return thing
 
-if use_preset == True:
-    thing = preset_num_of_bots
-else:
-    thing = get_bot_quantity() #This triggers the above function to ask the user how many bots they wanna use,
-    if thing == "NULL": #This retries get_bot_quantity when the input is not a number.
+thing = get_bot_quantity() #This triggers the above function to ask the user how many bots they wanna use,
+
+if thing == "NULL": #This retries get_bot_quantity when the input is not a number.
+    thing = get_bot_quantity()
+else: #Else statement used because im mixing str/int in 'thing'
+    if thing <= 0: #This retries get_bot_quantity when the input is equal to or lower than 0.
+        print(bcolors.FAIL + ("You must use a number greater than or equal to 1. Let's try that again.") + bcolors.ENDC)
         thing = get_bot_quantity()
-    else: #Else statement used because im mixing str/int in 'thing'
-        if thing <= 0: #This retries get_bot_quantity when the input is equal to or lower than 0.
-            print(bcolors.FAIL + ("You must use a number greater than or equal to 1. Let's try that again.") + bcolors.ENDC)
-            thing = get_bot_quantity()
 
-if use_preset == True:
-    given_pass = preset_password
-    bootup_message = "I am logging in with the preset options: \nUsername prefix - " + str(preset_username) + "\nPassword - " + str(preset_password) + "\nNumber of bots - " + str(preset_num_of_bots)
-    print(bcolors.OKGREEN + bootup_message + bcolors.ENDC)
-else:
-    given_pass = input(bcolors.OKGREEN + ("\n" + str(thing) + " bots, got it! What is the password for your bots?: ") + bcolors.ENDC) #This asks for the bot's password, it doesn't need error handling.
-
-if setup_preset == True:
-    clear = open("startup.py", "w+")
-    clear.write("\'\'\'\nThis is where you add details to speed up the bootup process.\n\'\'\'\nuse_preset = True\n\npreset_username = \"" + str(username_thing) + "\"\n\npreset_password = \"" + str(given_pass) + "\"\n\npreset_num_of_bots = " + str(thing))
-    clear.close()
-    bootup_message = "I've added the following presets to setup.py: \n\nUsername prefix - " + str(username_thing) + "\nPassword - " + str(given_pass) + "\nNumber of bots - " + str(thing) + "\n"
-    print(bcolors.OKGREEN + bootup_message + bcolors.ENDC)
-    time.sleep(1)
-    input(bcolors.OKGREEN + "Press enter to begin logging in: " + bcolors.ENDC)
-
+given_pass = input(bcolors.OKGREEN + ("\n" + str(thing) + " bots, got it! What is the password for your bots?: ") + bcolors.ENDC) #This asks for the bot's password, it doesn't need error handling.
+print(bcolors.OKGREEN + ("\nThanks! Please stand by while I login to your bots, I'll let you know when I'm done.") + bcolors.ENDC)
 time.sleep(1)
 print(bcolors.FAIL + emoji.emojize(":warning: RED messages are important and require your attention, keep an eye out for them!") + bcolors.ENDC) #This is an example red text, ooooo
 time.sleep(3)
@@ -214,7 +158,7 @@ def login(give_a_username, give_a_password, thing): #This is a function for logg
         def __init__(self): #Constructor for the SpamBotnet class above
             self.client = KikClient(self, username, password) #This is where the previously stored user/pass goes to login
 
-        global result
+        global result, antipurge, name
         result = None #This makes the login scripts wait until the login succeeds or fails before trying again
 
         def on_login_ended(self, response: LoginResponse): #This is triggered when the bot is done logging in
@@ -568,7 +512,7 @@ def login(give_a_username, give_a_password, thing): #This is a function for logg
             for user in jid_list:
                 self.client.add_friend(user)
                 time.sleep(0.3)
-                
+
         def on_connection_failed(self, response: ConnectionFailedResponse): #This function is triggered when your kik bot's connection is closed/fails
             global result
             result = False #This lets the login stanzas know that the login failed and it can continue with the next one.
@@ -656,9 +600,13 @@ while number_of_attempts > 0: #This checks if it is the first login attempt or n
     if number_of_errors > 0: #This checks if there are any errors left. If there are errors, it continues.
         retry_login(given_pass) #This attempts login again
     number_of_attempts = number_of_attempts - 1 #This subtracts 1 from the number of attemots so that it only retries a specified number of times.
-#keep_alive()
-time.sleep(2) #Slight delay so stuff doesnt spam
-print(bcolors.OKGREEN + emoji.emojize("\n:black_small_square: \"Spam [JID or Username] w/ [Message]\" - Used to spam a user's PMs.\n:black_small_square: \"Spam Gif [JID or Username] w/ [Query]\" - Used to spam a user's PMs with a gif.\n:black_small_square: \"Poke [JID or username] w/ [Message]\" - Used for forwarding a single message to a user.\n:black_small_square: \"Poke Gif [JID or username] w/ [Query]\" - Used for forwarding a single gif to a user.\n:black_small_square: \"Friend\" - Used to add the bot as a friend so that you can add it to groups.\n:black_small_square: \"SendFriend [JID or Username]\" - Used to send a friend attribution request to a user.\n:black_small_square: \"GroupSpam [Message]\" - Used to spam the group that this command is used in.\n:black_small_square: \"GroupSpam Gif [Query]\" - Used to spam the group that this command is used in with gifs.\n:black_small_square: \"Gif [Query]\" - Used to send a single gif in the group that this command is used in.\n:black_small_square: \"Leave [GJID]\" - Used for making your bot(s) leave groups.\n") + bcolors.ENDC) #This explains the commands to the user
+
+jidlist_file = open("jidlist.txt", "r")
+jidlist_read = jidlist_file.read()
+jid_list = jidlist_read.split("\n")
+
+time.sleep(1) #Slight delay so stuff doesnt spam
+print(bcolors.OKGREEN + emoji.emojize("\n:black_small_square: \"Spam [JID or Username] w/ [Message]\" - Used to spam a user's PMs.\n:black_small_square: \"Spam Gif [JID or Username] w/ [Query]\" - Used to spam a user's PMs with a gif.\n:black_small_square: \"Poke [JID or username] w/ [Message]\" - Used for forwarding a single message to a user.\n:black_small_square: \"Poke Gif [JID or username] w/ [Query]\" - Used for forwarding a single gif to a user.\n:black_small_square: \"Friend\" - Used to add the bot as a friend so that you can add it to groups.\n:black_small_square: \"SendFriend [JID or Username]\" - Used to send a friend attribution request to a user.\n:black_small_square: \"GroupSpam [Message]\" - Used to spam the group that this command is used in.\n:black_small_square: \"GroupSpam Gif [Query]\" - Used to spam the group that this command is used in with gifs.\n:black_small_square: \"Gif [Query]\" - Used to send a single gif in the group that this command is used in.\n:black_small_square: \"Leave [GJID]\" - Used for making your bot(s) leave groups.\n\n*PREMIUM COMMANDS*\n:black_small_square: \"Refresh\" - Used to make the bots friend eachother.\n:black_small_square: \"Antipurge [on/off]\" - Used to toggle repeatedly unbanning/adding/promoting all other bots.\n:black_small_square: \"Antipurge check\" - Used to check if antipurge is on.\n:black_small_square: \"AddAll\" - Used for adding all other bots to a group.\n:black_small_square: \"Promote [JID/Username]\" - Used for promoting users when bot has admin.\n:black_small_square: \"Demote [JID/Username]\" - Used for demoting users when bot has admin.") + bcolors.ENDC) #This explains the commands to the user
 print(bcolors.FAIL + emoji.emojize("\n:warning: You can now use the botnet.\n") + bcolors.ENDC) #This lets the user know the botnet is ready
 clear = open("loginretry.txt", "w+") #This clears the Loginretry.txt file
 clear.close() #This closes the file, always a good practice.
