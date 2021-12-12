@@ -1,10 +1,12 @@
+#from keepalive import keep_alive
+#keep_alive()
+
 import sys
 import os
 import time
 import subprocess
 import socket
 import contextlib
-#from keepalive import keep_alive
 from urllib.request import urlopen
 check_for_startup = os.path.exists("startup.py")
 if check_for_startup == False:
@@ -107,15 +109,6 @@ print(bcolors.OKBLUE + ("\nThank you for using the paid version, you keep me mod
 name = input(bcolors.OKGREEN + ("\nWhat is your name?: ") + bcolors.ENDC)
 
 print(bcolors.OKGREEN + ("\nHello, " + name + "!") + bcolors.ENDC)
-
-global username_thing, spam, debug_jid, thing, attempt_number, given_pass, setup_preset #This declares these variables as global to be used everywhere because I'm lazy
-attempt_number = 0 #This helps to check if it is the first set of logins or not for retrying closed connections.
-print("For help, check out the README! https://github.com/StethoSaysHello/KikBotnet\n") #This is a lil disclaimer on bootup.
-print(bcolors.OKGREEN + ("╭╮╭━╮╭╮    ╭━━╮   ╭╮      ╭╮\n┃┃┃╭╯┃┃    ┃╭╮┃  ╭╯╰╮    ╭╯╰╮\n┃╰╯╯╭┫┃╭╮  ┃╰╯╰┳━┻╮╭╋━╮╭━┻╮╭╯\n┃╭╮┃┣┫╰╯╯  ┃╭━╮┃╭╮┃┃┃╭╮┫┃━┫┃\n┃┃┃╰┫┃╭╮╮  ┃╰━╯┃╰╯┃╰┫┃┃┃┃━┫╰╮\n╰╯╰━┻┻╯╰╯  ╰━━━┻━━┻━┻╯╰┻━━┻━╯\n##### Created by Stetho #####") + bcolors.ENDC) #This is some neat text art on bootup. ooo greeeen
-spam = "Qm90IG1hZGUgYnkgU3RldGhvU2F5c0hlbGxv" #This is just a random variable to be used later in the "spam" command.
-debug_jid = "8675309debug_y8f@talk.kik.com" #This is where activity info is sent to. Has to be a JID, not a GJID.
-
-print(bcolors.OKGREEN + "\nLet's get started!" + bcolors.ENDC)
 
 setup_preset = False
 def get_preset():
@@ -233,29 +226,12 @@ def login(give_a_username, give_a_password, thing): #This is a function for logg
 
         def on_login_ended(self, response: LoginResponse): #This is triggered when the bot is done logging in
             ominous_dots(bcolors.OKGREEN + ("Logging in as @" + str(username)) + bcolors.ENDC) #This lets you know your bot logged in in the terminal. It says the first/last name and username.
-            
-def on_authenticated(self): #This is triggered when the bot is authenticated (yayyyy no closed connection)
+
+        def on_authenticated(self): #This is triggered when the bot is authenticated (yayyyy no closed connection)
             print(bcolors.OKGREEN + (" Successfully logged in!"))
             global result
             result = True #This lets the login stanzas know that the login was authenticated and it can continue with the next login
             self.client.request_roster()  # This requests the roster, which is later used in on_roster_recieved
-            def get_my_jid():
-                try:
-                    my_jid = self.client.get_jid(stetho_string)
-                    return my_jid
-                except:
-                    return False
-
-            my_jid = get_my_jid()
-            while my_jid == False:
-                my_jid = get_my_jid()
-            jidlist = open("jidlist.txt", "a+")
-            jidlist.write(my_jid + "\n")
-            jidlist.close()
-
-        def on_friend_attribution(self, response: chatting.IncomingFriendAttribution):
-            print("[+] Friend attribution request from " + response.referrer_jid)
-            self.client.add_friend(response.referrer_jid)
 
         def on_chat_message_received(self, chat_message: chatting.IncomingChatMessage): #This is triggered when a PM is recieved
             global antipurge
