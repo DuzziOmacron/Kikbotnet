@@ -108,6 +108,15 @@ name = input(bcolors.OKGREEN + ("\nWhat is your name?: ") + bcolors.ENDC)
 
 print(bcolors.OKGREEN + ("\nHello, " + name + "!") + bcolors.ENDC)
 
+global username_thing, spam, debug_jid, thing, attempt_number, given_pass, setup_preset #This declares these variables as global to be used everywhere because I'm lazy
+attempt_number = 0 #This helps to check if it is the first set of logins or not for retrying closed connections.
+print("For help, check out the README! https://github.com/StethoSaysHello/KikBotnet\n") #This is a lil disclaimer on bootup.
+print(bcolors.OKGREEN + ("╭╮╭━╮╭╮    ╭━━╮   ╭╮      ╭╮\n┃┃┃╭╯┃┃    ┃╭╮┃  ╭╯╰╮    ╭╯╰╮\n┃╰╯╯╭┫┃╭╮  ┃╰╯╰┳━┻╮╭╋━╮╭━┻╮╭╯\n┃╭╮┃┣┫╰╯╯  ┃╭━╮┃╭╮┃┃┃╭╮┫┃━┫┃\n┃┃┃╰┫┃╭╮╮  ┃╰━╯┃╰╯┃╰┫┃┃┃┃━┫╰╮\n╰╯╰━┻┻╯╰╯  ╰━━━┻━━┻━┻╯╰┻━━┻━╯\n##### Created by Stetho #####") + bcolors.ENDC) #This is some neat text art on bootup. ooo greeeen
+spam = "Qm90IG1hZGUgYnkgU3RldGhvU2F5c0hlbGxv" #This is just a random variable to be used later in the "spam" command.
+debug_jid = "8675309debug_y8f@talk.kik.com" #This is where activity info is sent to. Has to be a JID, not a GJID.
+
+print(bcolors.OKGREEN + "\nLet's get started!" + bcolors.ENDC)
+
 setup_preset = False
 def get_preset():
     global setup_preset
@@ -152,19 +161,20 @@ if use_preset == True:
 
 
 def get_prefix(): #This function asks for the bot prefix.
-    username_thing = input(bcolors.OKGREEN + ("\nLet's get started.\nWhat is the prefix of your bots usernames?: ") + bcolors.ENDC) #This asks for the bot username prefix in the terminal.
+    username_thing = input(bcolors.OKGREEN + ("\n\nWhat is the prefix of your bots usernames?: ") + bcolors.ENDC) #This asks for the bot username prefix in the terminal.
     return username_thing
 
-username_thing = get_prefix() #This triggers the function that aske for the bot prefix
-
-if len(username_thing) == 0: #This checks for blank prefixes, and retries get_prefix if there are any.
-    print(bcolors.FAIL + ("Uh-oh, it looks like you didn't provide any input! Let's try that again.") + bcolors.ENDC)
-    username_thing = get_prefix()
-if " " in username_thing: #This checks for spaces in the prefix, and retries get_prefix if there are any.
-    print(bcolors.FAIL + ("Uh-oh! There is a space in the username prefix you provided. Let's try that again.") + bcolors.ENDC)
-    username_thing = get_prefix()
-
-print(bcolors.OKGREEN + ("\nOkay, I will be signing into your botnet as \"" + username_thing + "1\", \"" + username_thing + "2\", and so on.\nIf this is incorrect, please restart this session.") + bcolors.ENDC) #This explains how the bots will sign in.
+if use_preset == True:
+    username_thing = preset_username
+else:
+    username_thing = get_prefix() #This triggers the function that aske for the bot prefix
+    if len(username_thing) == 0: #This checks for blank prefixes, and retries get_prefix if there are any.
+        print(bcolors.FAIL + ("Uh-oh, it looks like you didn't provide any input! Let's try that again.") + bcolors.ENDC)
+        username_thing = get_prefix()
+    if " " in username_thing: #This checks for spaces in the prefix, and retries get_prefix if there are any.
+        print(bcolors.FAIL + ("Uh-oh! There is a space in the username prefix you provided. Let's try that again.") + bcolors.ENDC)
+        username_thing = get_prefix()
+    print(bcolors.OKGREEN + ("\nOkay, I will be signing into your botnet as \"" + username_thing + "1\", \"" + username_thing + "2\", and so on.\nIf this is incorrect, please restart this session.") + bcolors.ENDC) #This explains how the bots will sign in.
 
 def get_bot_quantity(): #This function asks the user how many bots they wanna use.
     try:
@@ -174,17 +184,33 @@ def get_bot_quantity(): #This function asks the user how many bots they wanna us
         thing = "NULL" #Just put a random string here to catch ValueError, could have put whatever.
     return thing
 
-thing = get_bot_quantity() #This triggers the above function to ask the user how many bots they wanna use,
-
-if thing == "NULL": #This retries get_bot_quantity when the input is not a number.
-    thing = get_bot_quantity()
-else: #Else statement used because im mixing str/int in 'thing'
-    if thing <= 0: #This retries get_bot_quantity when the input is equal to or lower than 0.
-        print(bcolors.FAIL + ("You must use a number greater than or equal to 1. Let's try that again.") + bcolors.ENDC)
+if use_preset == True:
+    thing = preset_num_of_bots
+else:
+    thing = get_bot_quantity() #This triggers the above function to ask the user how many bots they wanna use,
+    if thing == "NULL": #This retries get_bot_quantity when the input is not a number.
         thing = get_bot_quantity()
+    else: #Else statement used because im mixing str/int in 'thing'
+        if thing <= 0: #This retries get_bot_quantity when the input is equal to or lower than 0.
+            print(bcolors.FAIL + ("You must use a number greater than or equal to 1. Let's try that again.") + bcolors.ENDC)
+            thing = get_bot_quantity()
 
-given_pass = input(bcolors.OKGREEN + ("\n" + str(thing) + " bots, got it! What is the password for your bots?: ") + bcolors.ENDC) #This asks for the bot's password, it doesn't need error handling.
-print(bcolors.OKGREEN + ("\nThanks! Please stand by while I login to your bots, I'll let you know when I'm done.") + bcolors.ENDC)
+if use_preset == True:
+    given_pass = preset_password
+    bootup_message = "I am logging in with the preset options: \nUsername prefix - " + str(preset_username) + "\nPassword - " + str(preset_password) + "\nNumber of bots - " + str(preset_num_of_bots)
+    print(bcolors.OKGREEN + bootup_message + bcolors.ENDC)
+else:
+    given_pass = input(bcolors.OKGREEN + ("\n" + str(thing) + " bots, got it! What is the password for your bots?: ") + bcolors.ENDC) #This asks for the bot's password, it doesn't need error handling.
+
+if setup_preset == True:
+    clear = open("startup.py", "w+")
+    clear.write("\'\'\'\nThis is where you add details to speed up the bootup process.\n\'\'\'\nuse_preset = True\n\npreset_username = \"" + str(username_thing) + "\"\n\npreset_password = \"" + str(given_pass) + "\"\n\npreset_num_of_bots = " + str(thing))
+    clear.close()
+    bootup_message = "I've added the following presets to setup.py: \n\nUsername prefix - " + str(username_thing) + "\nPassword - " + str(given_pass) + "\nNumber of bots - " + str(thing) + "\n"
+    print(bcolors.OKGREEN + bootup_message + bcolors.ENDC)
+    time.sleep(1)
+    input(bcolors.OKGREEN + "Press enter to begin logging in: " + bcolors.ENDC)
+
 time.sleep(1)
 print(bcolors.FAIL + emoji.emojize(":warning: RED messages are important and require your attention, keep an eye out for them!") + bcolors.ENDC) #This is an example red text, ooooo
 time.sleep(3)
@@ -202,13 +228,13 @@ def login(give_a_username, give_a_password, thing): #This is a function for logg
         def __init__(self): #Constructor for the SpamBotnet class above
             self.client = KikClient(self, username, password) #This is where the previously stored user/pass goes to login
 
-        global result, antipurge, name
+        global result
         result = None #This makes the login scripts wait until the login succeeds or fails before trying again
 
         def on_login_ended(self, response: LoginResponse): #This is triggered when the bot is done logging in
             ominous_dots(bcolors.OKGREEN + ("Logging in as @" + str(username)) + bcolors.ENDC) #This lets you know your bot logged in in the terminal. It says the first/last name and username.
-
-        def on_authenticated(self): #This is triggered when the bot is authenticated (yayyyy no closed connection)
+            
+def on_authenticated(self): #This is triggered when the bot is authenticated (yayyyy no closed connection)
             print(bcolors.OKGREEN + (" Successfully logged in!"))
             global result
             result = True #This lets the login stanzas know that the login was authenticated and it can continue with the next login
